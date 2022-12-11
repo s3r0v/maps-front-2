@@ -74,24 +74,15 @@ ymaps.ready(['Map', 'Polygon']).then(function() {
 
     drawLineOverMap(map)
         .then(function(coordinates) {
-          // Переводим координаты из 0..1 в географические.
           var bounds = map.getBounds();
           coordinates = coordinates.map(function(x) {
             return [
               // Широта (latitude).
               // Y переворачивается, т.к. на canvas'е он направлен вниз.
               bounds[0][0] + (1 - x[1]) * (bounds[1][0] - bounds[0][0]),
-              // Долгота (longitude).
               bounds[0][1] + x[0] * (bounds[1][1] - bounds[0][1]),
             ];
           });
-
-          // Тут надо симплифицировать линию.
-          // Для простоты я оставляю только каждую третью координату.
-          coordinates = coordinates.filter(function (_, index) {
-            return index % 3 === 0;
-          });
-
 
           drawButton.disabled = false;
         });
@@ -144,7 +135,6 @@ function drawLineOverMap(map) {
     // При отпускании мыши запоминаем координаты и скрываем канвас.
     canvas.onmouseup = function(e) {
       coordinates.push([e.offsetX, e.offsetY]);
-      canvas.style.display = 'none';
       drawing = false;
 
       coordinates = coordinates.map(function(x) {
@@ -156,21 +146,12 @@ function drawLineOverMap(map) {
   });
 }
 
-const request = new XMLHttpRequest();
-request.open('POST', `http://164.92.223.247/api/get_routes?`, false);
-request.setRequestHeader('Authorization', localStorage.getItem('token'))
-request.send();
-if (request.status != 200){
-  let tasks = [];
-}
-let tasks = JSON.parse(request.response);
-
 export default{
     name: "Tool",
     data (){
         return{
             showModal: false,
-            taskslocal: tasks,
+            taskslocal: [],
         }
     },
     computed: {
@@ -233,7 +214,7 @@ map-block{
     height: 40.9375vw;
     left: 0;
     top: 60.572916666vw;
-    background: url(../media/back\ fon.svg) no-repeat;
+    background: url('../media/back fon.svg') no-repeat;
     background-size: 100%;
 }
 .user-routes-header{
